@@ -1,4 +1,6 @@
-# TõhusAeg []
+# TõhusAeg
+
+LTAT.03.001 esimene projekt
 
 Projekti eesmärk teha TO-DO list, millisse võib uusi ülesandeid lisada, kui ka neid muuta.
 See võiks inimestel aidata oma aega paremini hallata.
