@@ -1,5 +1,23 @@
 import sqlite3
+import tkinter as tk
+from tkinter import messagebox
 
+class Database_sqlite:
+    def __init__(self, database_name: str, table_name: str):
+        self.conn = create_connection(database_name)
+        self.c = self.conn.cursor()
+        self.table_name = table_name
+        self.__create_table_if_doesnt_exist__()
+    
+    def __create_table_if_doesnt_exist__(self):
+        self.c.execute(f'''CREATE TABLE IF NOT EXISTS {self.table_name} (
+            id INTEGER PRIMARY KEY,
+            ülesanne TEXT NOT NULL,
+            staatus BOOLEAN NOT NULL
+            )''')
+        self.conn.commit()
+
+        
 def create_connection(db_file) -> sqlite3.Connection:
     conn = None
     try:
