@@ -1,6 +1,4 @@
 import sqlite3
-import tkinter as tk
-from tkinter import messagebox
 
 class Database_sqlite:
     def __init__(self, database_name: str, table_name: str):

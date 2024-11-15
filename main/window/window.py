@@ -14,9 +14,9 @@ class Window:
         self.laadi_ülesanded()
         self.aken.mainloop()
 
-    def add_button(self, button_name: str, width: int, command: callable):
+    def add_button(self, button_name: str, width: int, command: callable, pady=5):
         lisa_nupp = tk.Button(self.aken, text=button_name, width=width, command=command)
-        lisa_nupp.pack(pady=5)
+        lisa_nupp.pack(pady=pady)
     def __input__(self):
         self.ülesanne_sisend = tk.Entry(self.aken, width=40)
         self.ülesanne_sisend.pack(pady=10)
