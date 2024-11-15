@@ -7,7 +7,10 @@ See võiks inimestel aidata oma aega paremini hallata.
 
 ## Features
 
--
+- Ülesannete lisamine
+- Ülesannete kustutamine
+- Tehtuks märkimine
+- Use of sqlite3
 
 ## License
 
