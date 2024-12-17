@@ -15,49 +15,64 @@ class Window:
         self.laadi_ülesanded()
         self.aken.mainloop()
 
+    # Add button
     def add_button(self, button_name: str, width: int, command: callable, pady=5):
         lisa_nupp = tk.Button(self.aken, text=button_name, width=width, command=command)
         lisa_nupp.pack(pady=pady)
+
+    # Add inputs
     def __input__(self):
+        # Ülesanne sisend - input for the tasks
         self.ülesanne_sisend = tk.Entry(self.aken, width=40)
         self.ülesanne_sisend.pack(pady=10)
+
+    # Add listbox
     def __listbox__(self):
         self.ülesanne_loend = tk.Listbox(self.aken, width=40, height=15)
         self.ülesanne_loend.pack(pady=10)
-    
+
+    # Add new task
     def lisa_ülesanne(self):
         ülesanne = self.ülesanne_sisend.get().strip()
         if ülesanne:
-            self.database.c.execute(f"INSERT INTO {self.database.table_name} (ülesanne, staatus) VALUES (?, ?)", (ülesanne, "pooleli"))
-            self.database.conn.commit()
-            self.ülesanne_sisend.delete(0, tk.END)
+            self.database.insert("ülesanne", "staatus", ülesanne, False)
+            self.clear_input()
             self.laadi_ülesanded()
         else:
             messagebox.showwarning("Viga", "Sisesta ülesande tekst")
 
+    # Load the tasks
     def laadi_ülesanded(self):
-        self.ülesanne_loend.delete(0, tk.END)
-        for row in self.database.c.execute(f"SELECT * FROM {self.database.table_name}"):
-            ülesanne_tekst = row[1] + (" ✔" if row[2] == True else "")
+        self.clear_listbox()
+        for row in self.database.select_all():
+            ülesanne_tekst = row[1]
+            if row[2]:
+                ülesanne_tekst += "[✔]"
             self.ülesanne_loend.insert(tk.END, ülesanne_tekst)
-    
+
+    # Remove the task
     def kustuta_ülesanne(self):
         try:
-            valitud_index = self.ülesanne_loend.curselection()[0]
-            valitud_ülesanne = self.database.c.execute(f"SELECT id FROM {self.database.table_name}").fetchall()[valitud_index]
-            ülesanne_id = valitud_ülesanne[0]
-            self.database.c.execute(f"DELETE FROM {self.database.table_name} WHERE id = ?", (ülesanne_id,))
-            self.database.conn.commit()
+            index = self.ülesanne_loend.curselection()[0]
+            valitud_ülesanne = self.database.select("id").fetchall()[index][0]
+            self.database.delete(valitud_ülesanne)
             self.laadi_ülesanded()
         except (tk.TclError, IndexError):
             messagebox.showwarning("Viga", "Vali ülesanne kustutamiseks")
 
+    # Self explanatory
+    def clear_listbox(self):
+        self.ülesanne_loend.delete(0, tk.END)
+
+    # Self explanatory
+    def clear_input(self):
+        self.ülesanne_sisend.delete(0, tk.END)
+
+    # Tick the task as done
     def märgi_tehtud(self):
         try:
             valitud_ülesanne = self.ülesanne_loend.get(self.ülesanne_loend.curselection())
-            ülesanne_tekst = valitud_ülesanne.replace(" ✔", "")
-            self.database.c.execute("UPDATE ülesanded SET staatus = TRUE WHERE ülesanne = ?", (ülesanne_tekst,))
-            self.database.conn.commit()
+            self.database.update_value("staatus", "ülesanne", valitud_ülesanne, True)
             self.laadi_ülesanded()
         except tk.TclError:
             messagebox.showwarning("Viga", "Vali ülesanne, mida märkida tehtuks")

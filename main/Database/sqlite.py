@@ -14,6 +14,25 @@ class Database_sqlite:
             staatus BOOLEAN NOT NULL
             )''')
         self.conn.commit()
+    
+    def insert(self, column1, column2, key, value):
+        self.c.execute(f"INSERT INTO {self.table_name} ({column1}, {column2}) VALUES (?, ?)", (key, value))
+        self.conn.commit()
+    
+    def delete(self, key):
+        self.c.execute(f"DELETE FROM {self.table_name} WHERE id = ?", (key,))
+        self.conn.commit()
+    
+    def update_value(self, column, column1, key, value):
+        self.c.execute(f"UPDATE {self.table_name} SET {column} = ? WHERE {column1} = ?", (value, key))
+        self.conn.commit()
+    
+    def select(self, column):
+        return self.c.execute(f"SELECT {column} FROM {self.table_name}")
+    
+    def select_all(self):
+        return self.select("*")
+    
 
         
 def create_connection(db_file) -> sqlite3.Connection:
