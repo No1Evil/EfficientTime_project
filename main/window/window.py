@@ -52,27 +52,28 @@ class Window:
 
     # Remove the task
     def kustuta_ülesanne(self):
-        try:
-            index = self.ülesanne_loend.curselection()[0]
-            valitud_ülesanne = self.database.select("id").fetchall()[index][0]
-            self.database.delete(valitud_ülesanne)
-            self.laadi_ülesanded()
-        except (tk.TclError, IndexError):
-            messagebox.showwarning("Viga", "Vali ülesanne kustutamiseks")
+        valitud_ülesanne = self.get_cursor_taskId_by_id()
+        self.database.delete(valitud_ülesanne)
+        self.laadi_ülesanded()
 
-    # Self explanatory
     def clear_listbox(self):
         self.ülesanne_loend.delete(0, tk.END)
 
-    # Self explanatory
     def clear_input(self):
         self.ülesanne_sisend.delete(0, tk.END)
 
     # Tick the task as done
     def märgi_tehtud(self):
+        valitud_ülesanne = self.get_cursor_taskId_by_id()
+        staatus = bool(self.database.get_value("staatus", valitud_ülesanne))
+        self.database.update_value("staatus", "id", staatus, valitud_ülesanne)
+        self.laadi_ülesanded()
+
+    def get_cursor_taskId_by_id(self):
         try:
-            valitud_ülesanne = self.ülesanne_loend.get(self.ülesanne_loend.curselection())
-            self.database.update_value("staatus", "ülesanne", valitud_ülesanne, True)
-            self.laadi_ülesanded()
-        except tk.TclError:
-            messagebox.showwarning("Viga", "Vali ülesanne, mida märkida tehtuks")
+            index = self.ülesanne_loend.curselection()[0]
+            valitud_ülesanne = self.database.select("id").fetchall()[index][0]
+            return valitud_ülesanne
+        except (tk.TclError, IndexError):
+            messagebox.showwarning("Viga", "Vali ülesanne")
+            return None
