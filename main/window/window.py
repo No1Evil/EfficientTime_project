@@ -58,7 +58,6 @@ class Window(window_settings):
     def __laadi_ülesanded(self):
         self.__clear_listbox()
         for row in self.database.select_all():
-            print(row)
             ülesanne_tekst = row[1]
             if row[2]:
                 ülesanne_tekst += "[✔]"
