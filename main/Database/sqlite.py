@@ -5,29 +5,38 @@ class Database_sqlite:
         self.conn = create_connection(database_name)
         self.c = self.conn.cursor()
         self.table_name = table_name
-        self.__create_table_if_doesnt_exist__()
+        self.__create_table_if_doesnt_exist()
     
-    def __create_table_if_doesnt_exist__(self):
+    def __create_table_if_doesnt_exist(self):
         self.c.execute(f'''CREATE TABLE IF NOT EXISTS {self.table_name} (
             id INTEGER PRIMARY KEY,
-            ülesanne TEXT NOT NULL,
-            staatus BOOLEAN NOT NULL
+            name TEXT NOT NULL,
+            status BOOLEAN NOT NULL
             )''')
         self.conn.commit()
 
     def insert(self, column1, column2, key, value):
         self.c.execute(f"INSERT INTO {self.table_name} ({column1}, {column2}) VALUES (?, ?)", (key, value))
         self.conn.commit()
-
-    def get_value(self, column, key):
-        return self.c.execute(f"SELECT {column} FROM {self.table_name} WHERE id = ?", (key,)).fetchone()[0]
-    
-    def delete(self, key):
-        self.c.execute(f"DELETE FROM {self.table_name} WHERE id = ?", (key,))
-        self.conn.commit()
     
     def update_value(self, column, column1, value, key):
         self.c.execute(f"UPDATE {self.table_name} SET {column} = ? WHERE {column1} = ?", (value, key))
+        self.conn.commit()
+
+    def __do_action(self, action: str, column: str, id: int):
+        return self.c.execute(f"{action} {column} FROM {self.table_name} WHERE id = ?", (id,))
+
+    def get_value(self, column, id):
+        return self.__do_action("SELECT", column, id)
+    
+    def get_name_value(self, id):
+        return self.get_value("name", id).fetchone()[0]
+    
+    def get_status_value(self, id):
+        return self.get_value("status", id).fetchone()[0]
+
+    def delete(self, id):
+        self.__do_action("DELETE", "", id)
         self.conn.commit()
     
     def select(self, column):
@@ -56,10 +65,3 @@ def insert_data(conn, table, data):
     cur.execute(sql, tuple(data.values()))
     conn.commit()
     return cur.lastrowid
-
-
-
-# Example usage:
-# conn = create_connection("example.db")
-# data = {"column1": "value1", "column2": "value2"}
-# insert_data(conn, "table_name", data)

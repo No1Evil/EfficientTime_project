@@ -2,78 +2,78 @@ import tkinter as tk
 from tkinter import messagebox
 from Database.sqlite import *
 
-class Window:
-    def __init__(self, title: str, database: Database_sqlite):
-        self.aken = tk.Tk()
-        self.aken.title(title)
-        self.database = database
-        self.__input__()
-        self.add_button("Lisa ülesanne", 20, self.lisa_ülesanne)
-        self.add_button("Kustuta ülesanne", 20, self.kustuta_ülesanne)
-        self.add_button("Märgi tehtuks", 20, self.märgi_tehtud)
-        self.__listbox__()
-        self.laadi_ülesanded()
-        self.aken.mainloop()
-
-    # Add button
-    def add_button(self, button_name: str, width: int, command: callable, pady=5):
+class window_settings:
+    def _add_button(self, button_name: str, width: int, command: callable, pady=5):
         lisa_nupp = tk.Button(self.aken, text=button_name, width=width, command=command)
         lisa_nupp.pack(pady=pady)
 
     # Add inputs
-    def __input__(self):
+    def _add_inputs(self):
         # Ülesanne sisend - input for the tasks
         self.ülesanne_sisend = tk.Entry(self.aken, width=40)
         self.ülesanne_sisend.pack(pady=10)
 
     # Add listbox
-    def __listbox__(self):
+    def _add_listbox(self):
         self.ülesanne_loend = tk.Listbox(self.aken, width=40, height=15)
         self.ülesanne_loend.pack(pady=10)
+
+class Window(window_settings):
+    def __init__(self, title: str, database: Database_sqlite):
+        self.aken = tk.Tk()
+        self.aken.title(title)
+        self.database = database
+        self._add_inputs()
+        self._add_button("Lisa ülesanne", 20, self.lisa_ülesanne)
+        self._add_button("Kustuta ülesanne", 20, self.kustuta_ülesanne)
+        self._add_button("Märgi tehtuks", 20, self.märgi_tehtud)
+        self._add_listbox()
+        self.__laadi_ülesanded()
+        self.aken.mainloop()
 
     # Add new task
     def lisa_ülesanne(self):
         ülesanne = self.ülesanne_sisend.get().strip()
         if ülesanne:
-            self.database.insert("ülesanne", "staatus", ülesanne, False)
-            self.clear_input()
-            self.laadi_ülesanded()
+            self.database.insert("name", "status", ülesanne, False)
+            self.__clear_input()
+            self.__laadi_ülesanded()
         else:
             messagebox.showwarning("Viga", "Sisesta ülesande tekst")
 
+    # Remove the task
+    def kustuta_ülesanne(self):
+        valitud_ülesanne = self.__get_selected_task_id()
+        self.database.delete(valitud_ülesanne)
+        self.__laadi_ülesanded()
+    
+    # Tick the task as done
+    def märgi_tehtud(self):
+        valitud_ülesanne = self.__get_selected_task_id()
+        status = bool(self.database.get_status_value(valitud_ülesanne))
+        self.database.update_value("status", "id", not status, valitud_ülesanne)
+        self.__laadi_ülesanded()
+
     # Load the tasks
-    def laadi_ülesanded(self):
-        self.clear_listbox()
+    def __laadi_ülesanded(self):
+        self.__clear_listbox()
         for row in self.database.select_all():
+            print(row)
             ülesanne_tekst = row[1]
             if row[2]:
                 ülesanne_tekst += "[✔]"
             self.ülesanne_loend.insert(tk.END, ülesanne_tekst)
 
-    # Remove the task
-    def kustuta_ülesanne(self):
-        valitud_ülesanne = self.get_cursor_taskId_by_id()
-        self.database.delete(valitud_ülesanne)
-        self.laadi_ülesanded()
-
-    def clear_listbox(self):
+    def __clear_listbox(self):
         self.ülesanne_loend.delete(0, tk.END)
 
-    def clear_input(self):
+    def __clear_input(self):
         self.ülesanne_sisend.delete(0, tk.END)
 
-    # Tick the task as done
-    def märgi_tehtud(self):
-        valitud_ülesanne = self.get_cursor_taskId_by_id()
-        staatus = bool(self.database.get_value("staatus", valitud_ülesanne))
-        self.database.update_value("staatus", "id", staatus, valitud_ülesanne)
-        self.laadi_ülesanded()
-
-    def get_cursor_taskId_by_id(self):
+    def __get_selected_task_id(self):
         try:
-            index = self.ülesanne_loend.curselection()[0]
-            valitud_ülesanne = self.database.select("id").fetchall()[index][0]
-            return valitud_ülesanne
+            index = self.ülesanne_loend.curselection()[0] + 1
+            return index
         except (tk.TclError, IndexError):
             messagebox.showwarning("Viga", "Vali ülesanne")
             return None
