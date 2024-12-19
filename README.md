@@ -11,6 +11,7 @@ See võiks inimestel aidata oma aega paremini hallata.
 - Ülesannete kustutamine
 - Tehtuks märkimine
 - Use of sqlite3
+- Use of json
 
 ## License
 
