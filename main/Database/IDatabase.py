@@ -1,3 +1,4 @@
+# An Interface class for databases
 class Database:
     def get_value(self, key: str):
         pass

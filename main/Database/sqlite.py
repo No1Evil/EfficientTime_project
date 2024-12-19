@@ -63,13 +63,3 @@ def create_connection(db_file) -> sqlite3.Connection:
     except sqlite3.Error as e:
         print(e)
     return conn
-
-def insert_data(conn, table, data):
-    columns = ', '.join(data.keys())
-    placeholders = ', '.join('?' * len(data))
-    sql = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-    cur = conn.cursor()
-    cur.execute(f"CREATE TABLE IF NOT EXISTS {table} ({', '.join([f'{k} TEXT' for k in data.keys()])})")
-    cur.execute(sql, tuple(data.values()))
-    conn.commit()
-    return cur.lastrowid

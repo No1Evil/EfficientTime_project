@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from Database.IDatabase import Database
 
+# Default window settings
 class window_settings:
     def _add_button(self, button_name: str, width: int, command: callable, pady=5):
         lisa_nupp = tk.Button(self.aken, text=button_name, width=width, command=command)
@@ -18,6 +19,7 @@ class window_settings:
         self.ülesanne_loend = tk.Listbox(self.aken, width=40, height=15)
         self.ülesanne_loend.pack(pady=10)
 
+# Main window of TO-DO application
 class Window(window_settings):
     def __init__(self, title: str, database: Database):
         self.aken = tk.Tk()
