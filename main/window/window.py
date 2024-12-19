@@ -55,6 +55,8 @@ class Window(window_settings):
     # Tick the task as done
     def märgi_tehtud(self):
         valitud_ülesanne = self.__get_selected_task_id()
+        if valitud_ülesanne is None:
+            return
         status = bool(self.database.get_status_value(valitud_ülesanne))
         self.database.update_status(valitud_ülesanne, not status)
         self.__laadi_ülesanded()
