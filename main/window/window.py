@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from Database.sqlite import *
+from Database.IDatabase import Database
 
 class window_settings:
     def _add_button(self, button_name: str, width: int, command: callable, pady=5):
@@ -19,7 +19,7 @@ class window_settings:
         self.ülesanne_loend.pack(pady=10)
 
 class Window(window_settings):
-    def __init__(self, title: str, database: Database_sqlite):
+    def __init__(self, title: str, database: Database):
         self.aken = tk.Tk()
         self.aken.title(title)
         self.database = database
@@ -35,7 +35,7 @@ class Window(window_settings):
     def lisa_ülesanne(self):
         ülesanne = self.ülesanne_sisend.get().strip()
         if ülesanne:
-            self.database.insert("name", "status", ülesanne, False)
+            self.database.insert(ülesanne, False)
             self.__clear_input()
             self.__laadi_ülesanded()
         else:
@@ -44,14 +44,14 @@ class Window(window_settings):
     # Remove the task
     def kustuta_ülesanne(self):
         valitud_ülesanne = self.__get_selected_task_id()
-        self.database.delete(valitud_ülesanne)
+        self.database.delete_data(valitud_ülesanne)
         self.__laadi_ülesanded()
     
     # Tick the task as done
     def märgi_tehtud(self):
         valitud_ülesanne = self.__get_selected_task_id()
         status = bool(self.database.get_status_value(valitud_ülesanne))
-        self.database.update_value("status", "id", not status, valitud_ülesanne)
+        self.database.update_status(valitud_ülesanne, not status)
         self.__laadi_ülesanded()
 
     # Load the tasks

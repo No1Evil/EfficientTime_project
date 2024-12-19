@@ -1,6 +1,7 @@
 import sqlite3
+from .IDatabase import Database
 
-class Database_sqlite:
+class Database_sqlite(Database):
     def __init__(self, database_name: str, table_name: str):
         self.conn = create_connection(database_name)
         self.c = self.conn.cursor()
@@ -15,26 +16,33 @@ class Database_sqlite:
             )''')
         self.conn.commit()
 
-    def insert(self, column1, column2, key, value):
-        self.c.execute(f"INSERT INTO {self.table_name} ({column1}, {column2}) VALUES (?, ?)", (key, value))
+    def insert(self, name: str, status: bool):
+        self.c.execute(f"SELECT MAX(id) FROM {self.table_name}")
+        max_id = self.c.fetchone()[0]
+        next_id = (max_id + 1) if max_id is not None else 1
+        self.c.execute(f"INSERT INTO {self.table_name} (id, name, status) VALUES (?, ?, ?)", (next_id, name, status))
         self.conn.commit()
     
-    def update_value(self, column, column1, value, key):
-        self.c.execute(f"UPDATE {self.table_name} SET {column} = ? WHERE {column1} = ?", (value, key))
-        self.conn.commit()
+    def update_status(self, id: int, status: bool):
+        self.__do_action("UPDATE", f"status = {status}", id)
+        self.conn
 
     def __do_action(self, action: str, column: str, id: int):
         return self.c.execute(f"{action} {column} FROM {self.table_name} WHERE id = ?", (id,))
 
-    def get_value(self, column, id):
-        return self.__do_action("SELECT", column, id)
+    def get_value(self, key: str):
+        return self.c.execute(f"SELECT * FROM {self.table_name} WHERE id = ?", (key,)).fetchone()
     
-    def get_name_value(self, id):
-        return self.get_value("name", id).fetchone()[0]
+    def get_name_value(self, key: str):
+        return self.get_value(key)[1]
     
-    def get_status_value(self, id):
-        return self.get_value("status", id).fetchone()[0]
+    def get_status_value(self, key: str):
+        return self.get_value(key)[2]
 
+    def delete_data(self, id: str):
+        self.c.execute(f"DELETE FROM {self.table_name} WHERE id = ?", (id,))
+        self.conn.commit()
+    
     def delete(self, id):
         self.__do_action("DELETE", "", id)
         self.conn.commit()
