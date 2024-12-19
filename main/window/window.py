@@ -31,6 +31,9 @@ class Window(window_settings):
         self._add_button("Märgi tehtuks", 20, self.märgi_tehtud)
         self._add_listbox()
         self.__laadi_ülesanded()
+        self.__start()
+    
+    def __start(self):
         self.aken.mainloop()
 
     # Add new task

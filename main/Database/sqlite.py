@@ -17,15 +17,13 @@ class Database_sqlite(Database):
         self.conn.commit()
 
     def insert(self, name: str, status: bool):
-        self.c.execute(f"SELECT MAX(id) FROM {self.table_name}")
-        max_id = self.c.fetchone()[0]
-        next_id = (max_id + 1) if max_id is not None else 1
-        self.c.execute(f"INSERT INTO {self.table_name} (id, name, status) VALUES (?, ?, ?)", (next_id, name, status))
+        self.c.execute(f"INSERT INTO {self.table_name} (name, status) VALUES (?, ?)", (name, status))
         self.conn.commit()
     
     def update_status(self, id: int, status: bool):
-        self.__do_action("UPDATE", f"status = {status}", id)
-        self.conn
+        query = f"UPDATE {self.table_name} SET status = ? WHERE id = ?" 
+        self.c.execute(query, (status, id))
+        self.conn.commit()
 
     def __do_action(self, action: str, column: str, id: int):
         return self.c.execute(f"{action} {column} FROM {self.table_name} WHERE id = ?", (id,))
